@@ -15,7 +15,7 @@ class Node:
         self.action_func = action_func
         self.evaluate_func = evaluate_func
 
-    def is_fully_expanded(self):
+    def has_children(self):
         """ Check if the node has been expanded with any children. """
         return len(self.children) > 0
 

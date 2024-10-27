@@ -39,7 +39,7 @@ def mcts_search(root, evaluate, iterations=50, selection_policy=None, discount_f
             return node.state
 
         # Selection phase to find a leaf node
-        while node.is_fully_expanded():
+        while node.has_children():
             # find the best child, using the selection policy
             node = node.best_child(policy_func=selection_policy)
 
@@ -49,7 +49,7 @@ def mcts_search(root, evaluate, iterations=50, selection_policy=None, discount_f
                 break
 
         # Expansion
-        if node is not None and not node.is_fully_expanded():
+        if node is not None and not node.has_children():
             # expand the children nodes
             children = node.expand()
 
