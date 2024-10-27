@@ -18,22 +18,27 @@ def traverse_all_nodes(node):
     return nodes
 
 def mcts_search(root, evaluate, iterations=50, selection_policy=None, discount_factor=0.9, win_threshold=1.0, debug=False):
-    """ Performs MCTS search with immediate win termination and depth-based exploration adjustments. """
+    """Performs MCTS search and returns the best immediate next move for the AI."""
+
+    # Set logging level based on debug flag
+    if debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
 
     # Use a default policy if none is provided
     selection_policy = selection_policy or best_policy
 
-    # loop through each iteration
     for _ in range(iterations):
         # Selection
         node = root
-        
+
         # Immediate win check before expanding
         if evaluate(node.state) >= win_threshold:
             logger.debug("Winning state found during initial selection.")
             return node.state
-        
-        # Selection phase to find a fully expanded node
+
+        # Selection phase to find a leaf node
         while node.is_fully_expanded():
             node = node.best_child(policy_func=selection_policy)
             if node is None:
@@ -41,38 +46,29 @@ def mcts_search(root, evaluate, iterations=50, selection_policy=None, discount_f
                 break
 
         # Expansion
-        if node is not None:
+        if node is not None and not node.is_fully_expanded():
             children = node.expand()
             if children:
                 node = random.choice(children)
                 logger.debug(f"Expanded Node State:\n{node.state}\n")
 
-            # Simulation with depth-based discounting for rewards
-            depth = 0
-            current = node
-            while current.parent is not None:
-                depth += 1
-                current = current.parent
-            depth_discount = discount_factor ** depth
-            
-            # Evaluate the reward
-            reward = evaluate(node.state) * depth_discount if node else 0
+        # Simulation and backpropagation
+        if node is not None:
+            # Simulation (evaluate the node's state)
+            reward = evaluate(node.state)
             logger.debug(f"Evaluated State:\n{node.state}\nReward: {reward}")
 
             # Backpropagation
-            if node:
-                node.backpropagate(reward)
-                logger.debug(f"Backpropagated reward: {reward} to parent nodes.")
+            node.backpropagate(reward)
+            logger.debug(f"Backpropagated reward: {reward} to parent nodes.")
 
-    # Traverse all nodes and find the best one
-    all_nodes = traverse_all_nodes(root)
-    for node in all_nodes:
-        logger.debug(f"Node State:\n{node.state}\nReward: {node.reward}")
+    # After all iterations, select the best child of the root node
+    if root.children:
+        best_child = max(root.children, key=lambda c: c.reward)
+        final_state = best_child.state
+        logger.debug(f"Best Move State after search:\n{final_state}")
+        return final_state
+    else:
+        # No moves available, return the root state
+        return root.state
 
-    # Select the node with the highest reward
-    best_node = max(all_nodes, key=lambda n: n.reward, default=root)
-    final_state = best_node.state
-    logger.debug(f"Best Node State after search:\n{final_state}")
-
-    # return the final state
-    return final_state if final_state else None

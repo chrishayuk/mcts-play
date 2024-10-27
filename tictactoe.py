@@ -2,8 +2,8 @@ import logging
 from mcts.mcts_search import mcts_search
 from mcts.mcts_node import Node
 
-# Configure the logger for debug level output
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+# Configure the logger for info level output
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 def suggest_tictactoe_actions(state):
@@ -23,9 +23,9 @@ def suggest_tictactoe_actions(state):
 def evaluate_tictactoe(state, player="X"):
     """Evaluates the board state with high near-win rewards and game progression bonuses."""
     winning_combinations = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8],  # rows
-        [0, 3, 6], [1, 4, 7], [2, 5, 8],  # columns
-        [0, 4, 8], [2, 4, 6]              # diagonals
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],      # rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],      # columns
+        [0, 4, 8], [2, 4, 6]                  # diagonals
     ]
 
     # Reward for a win
@@ -42,14 +42,14 @@ def evaluate_tictactoe(state, player="X"):
         return 0.5  # Neutral reward for draw
 
     # Increased reward for near-win setups for the player
-    near_win_reward = 0.5  # Higher reward to prioritize near wins
+    near_win_reward = 0.5
     for combo in winning_combinations:
         marks = [state[pos] for pos in combo]
         if marks.count(player) == 2 and marks.count(" ") == 1:
             return near_win_reward
 
     # Penalty for allowing opponent's near-win setup
-    near_loss_penalty = -0.3  # Increased penalty for risky moves
+    near_loss_penalty = -0.3
     for combo in winning_combinations:
         marks = [state[pos] for pos in combo]
         if marks.count(opponent) == 2 and marks.count(" ") == 1:
@@ -59,11 +59,11 @@ def evaluate_tictactoe(state, player="X"):
     return 0
 
 def check_winner(state):
-    """Check for a winner in the current state."""
+    """Checks for a winner in the current state."""
     winning_combinations = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
-        [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
-        [0, 4, 8], [2, 4, 6]              # Diagonals
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],      # rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],      # columns
+        [0, 4, 8], [2, 4, 6]                  # diagonals
     ]
 
     for combo in winning_combinations:
@@ -74,34 +74,70 @@ def check_winner(state):
 
 def print_board(state):
     """Prints the Tic-Tac-Toe board in a 3x3 grid format."""
+    print("")
     for i in range(3):
         print(f"| {' | '.join(state[i * 3:(i + 1) * 3])} |")
         if i < 2:
             print("|---|---|---|")
+    print("")
 
-# Initialize root node with an empty Tic-Tac-Toe board and action/evaluate functions
+def player_move(state):
+    """Prompts the player for their move and updates the board state."""
+    while True:
+        try:
+            move = int(input("Enter your move (1-9): ")) - 1  # Convert to 0-indexed
+            if 0 <= move < 9 and state[move] == " ":
+                state[move] = "X"  # Assuming the player is 'X'
+                break
+            else:
+                print("Invalid move! Try again.")
+        except (ValueError, IndexError):
+            print("Invalid input! Please enter a number between 1 and 9.")
+
+# Initialize the game state
 initial_state = [" "] * 9
-root_node = Node(
-    initial_state,
-    action_func=suggest_tictactoe_actions,
-    evaluate_func=lambda s: evaluate_tictactoe(s, player="X")
-)
 
-# Run MCTS with the custom evaluate function and increased iterations
-best_move_state = mcts_search(root_node, evaluate=lambda s: evaluate_tictactoe(s, player="X"), iterations=500)
+# Main game loop
+while True:
+    # Initialize the game state
+    initial_state = [" "] * 9
 
-# Print the best move board state
-print("Best Move Board State:")
-print("")
-print_board(best_move_state)
-print("")
+    # Inner game loop
+    while True:
+        print_board(initial_state)  # Show current board state
 
-# Check for a winner and announce the result
-winner = check_winner(best_move_state)
-if winner:
-    print(f"Player {winner} wins!")
-else:
-    print("The game continues or it's a draw.")
+        # Player move
+        player_move(initial_state)
+        winner = check_winner(initial_state)
+        if winner or " " not in initial_state:
+            print_board(initial_state)
+            if winner:
+                print(f"Player {winner} wins!")
+            else:
+                print("It's a draw!")
+            break
 
-# formatting
-print("")
+        # AI move
+        root_node = Node(
+            initial_state,
+            action_func=suggest_tictactoe_actions,
+            evaluate_func=lambda s: evaluate_tictactoe(s, player="O")
+        )
+        best_move_state = mcts_search(root_node, evaluate=lambda s: evaluate_tictactoe(s, player="O"), iterations=500)
+        initial_state = best_move_state
+
+        winner = check_winner(initial_state)
+        if winner or " " not in initial_state:
+            print_board(initial_state)
+            if winner:
+                print(f"Player {winner} wins!")
+            else:
+                print("It's a draw!")
+            break
+
+    # Ask if the player wants to play again
+    play_again = input("Do you want to play again? (y/n): ").lower()
+    if play_again != 'y':
+        print("Thanks for playing!")
+        break
+
