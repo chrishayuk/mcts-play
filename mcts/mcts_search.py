@@ -8,22 +8,22 @@ logger = logging.getLogger(__name__)
 def traverse_all_nodes(node):
     """ Recursively gather all nodes in the subtree rooted at 'node'. """
     nodes = [node]
+
+    # loop through each child
     for child in node.children:
+        # traverse nodes
         nodes.extend(traverse_all_nodes(child))
+
+    # return nodes
     return nodes
 
 def mcts_search(root, evaluate, iterations=50, selection_policy=None, discount_factor=0.9, win_threshold=1.0, debug=False):
     """ Performs MCTS search with immediate win termination and depth-based exploration adjustments. """
-    
-    # Set logging level based on debug flag
-    if debug:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
 
     # Use a default policy if none is provided
     selection_policy = selection_policy or best_policy
 
+    # loop through each iteration
     for _ in range(iterations):
         # Selection
         node = root
@@ -73,5 +73,6 @@ def mcts_search(root, evaluate, iterations=50, selection_policy=None, discount_f
     best_node = max(all_nodes, key=lambda n: n.reward, default=root)
     final_state = best_node.state
     logger.debug(f"Best Node State after search:\n{final_state}")
-    
+
+    # return the final state
     return final_state if final_state else None
