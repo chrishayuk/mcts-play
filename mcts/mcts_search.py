@@ -1,5 +1,5 @@
-import random
 import logging
+from mcts.policy.random_policy import random_policy
 from mcts.policy.best_policy import best_policy
 
 # Initialize logger (assumes it's configured in main)
@@ -47,9 +47,13 @@ def mcts_search(root, evaluate, iterations=50, selection_policy=None, discount_f
 
         # Expansion
         if node is not None and not node.is_fully_expanded():
+            # expand the children nodes
             children = node.expand()
+
+            # check if we have children
             if children:
-                node = random.choice(children)
+                # get the node, using random policy
+                node = random_policy(children)
                 logger.debug(f"Expanded Node State:\n{node.state}\n")
 
         # Simulation and backpropagation

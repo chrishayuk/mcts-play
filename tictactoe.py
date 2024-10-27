@@ -81,13 +81,17 @@ def print_board(state):
             print("|---|---|---|")
     print("")
 
-def player_move(state):
+def player_move(state, counter):
     """Prompts the player for their move and updates the board state."""
     while True:
         try:
-            move = int(input("Enter your move (1-9): ")) - 1  # Convert to 0-indexed
+            # get the move
+            move = int(input("Enter your move (1-9): ")) - 1
+
+            # check the move is vaid
             if 0 <= move < 9 and state[move] == " ":
-                state[move] = "X"  # Assuming the player is 'X'
+                # set the move as the counter
+                state[move] = counter
                 break
             else:
                 print("Invalid move! Try again.")
@@ -104,13 +108,21 @@ while True:
 
     # Inner game loop
     while True:
-        print_board(initial_state)  # Show current board state
+        # Show current board state
+        print_board(initial_state)  
 
         # Player move
-        player_move(initial_state)
+        player_move(initial_state, "X")
+
+        # check for a winner
         winner = check_winner(initial_state)
+
+        # if we have a winner, or the game is over
         if winner or " " not in initial_state:
+            # print the board
             print_board(initial_state)
+
+            # if we have 
             if winner:
                 print(f"Player {winner} wins!")
             else:
@@ -123,9 +135,12 @@ while True:
             action_func=suggest_tictactoe_actions,
             evaluate_func=lambda s: evaluate_tictactoe(s, player="O")
         )
+
+        # get the best move
         best_move_state = mcts_search(root_node, evaluate=lambda s: evaluate_tictactoe(s, player="O"), iterations=500)
         initial_state = best_move_state
 
+        # check a winner
         winner = check_winner(initial_state)
         if winner or " " not in initial_state:
             print_board(initial_state)
