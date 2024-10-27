@@ -1,6 +1,6 @@
 import logging
-from mcts_search import mcts_search
-from mcts_node import Node
+from mcts.mcts_search import mcts_search
+from mcts.mcts_node import Node
 
 # Configure the logger for debug level output
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
