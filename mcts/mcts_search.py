@@ -1,6 +1,6 @@
 import random
 import logging
-from policy.best_policy import best_policy
+from mcts.policy.best_policy import best_policy
 
 # Initialize logger (assumes it's configured in main)
 logger = logging.getLogger(__name__)
