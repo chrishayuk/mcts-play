@@ -40,7 +40,10 @@ def mcts_search(root, evaluate, iterations=50, selection_policy=None, discount_f
 
         # Selection phase to find a leaf node
         while node.is_fully_expanded():
+            # find the best child, using the selection policy
             node = node.best_child(policy_func=selection_policy)
+
+            # check we got a node
             if node is None:
                 logger.debug("No valid child available during selection.")
                 break

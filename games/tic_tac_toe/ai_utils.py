@@ -17,15 +17,18 @@ def evaluate_tictactoe(state, player="X"):
     
     # Check if the player has a winning combination
     if check_winner(state) == player:
-        return 1  # Win
+        # Win
+        return 1  
     
     # Check if the opponent has a winning combination
     if check_winner(state) == opponent:
-        return -1  # Loss
+        # Loss
+        return -1  
     
     # Check for a draw
     if " " not in state:
-        return 0.5  # Draw
+        # Draw
+        return 0.5  
 
     # Neutral score for ongoing games
     return 0

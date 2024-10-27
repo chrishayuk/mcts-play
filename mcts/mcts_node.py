@@ -1,4 +1,4 @@
-# mcts_node.py
+# mcts/mcts_node.py
 class Node:
     def __init__(self, state, parent=None, action_func=None, evaluate_func=None):
         """ Initializes a Node in the MCTS tree. """
