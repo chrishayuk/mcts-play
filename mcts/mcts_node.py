@@ -40,8 +40,10 @@ class Node:
 
                 # Optional early stopping if maximum reward is achieved
                 if self.evaluate_func and child_node.reward >= 1:
-                    return self.children  # Stop expanding if max reward reached
+                    # Stop expanding if max reward reached
+                    return self.children  
         
+        # return the chilfren (if no childrem, return none)
         return self.children if self.children else None
 
     def best_child(self, policy_func):
